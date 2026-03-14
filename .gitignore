@@ -44,3 +44,6 @@ next-env.d.ts
 # OpenNext
 .open-next
 .wrangler
+
+# Bun
+package-lock.json
