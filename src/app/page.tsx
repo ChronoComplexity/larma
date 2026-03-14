@@ -1,5 +1,9 @@
 "use client";
 
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginModal } from "@/components/LoginModal";
+import { PlayButton } from "@/components/PlayButton";
+
 /* Figma: UniHack2 Opening Page - Real (node-id=1-3). Responsive: %-based layout, full width. */
 const IMG_BG = "/images/sky_bright.png";
 const IMG_MOUNTAIN =
@@ -8,13 +12,10 @@ const IMG_DOGS =
   "https://www.figma.com/api/mcp/asset/78192275-a9df-4389-83bd-8287ff7ff289";
 const IMG_GROUND = "/images/ground.png";
 
-/* Play button colors (vector style, matches pixel-art green) */
-const PLAY_CIRCLE_FILL = "#569629";
-const PLAY_TRIANGLE_FILL = "#2d4f15";
-
 export default function Home() {
+  const { openLoginModal, setOpenLoginModal } = useAuth();
   return (
-    <div className="opening-page fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-white">
+    <div className={`opening-page fixed inset-0 flex flex-col items-center justify-center bg-white ${openLoginModal ? "" : "overflow-hidden"}`}>
       <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
         {/* Sky — full width, top ~67% of canvas */}
         <div
@@ -60,34 +61,13 @@ export default function Home() {
           larma
         </p>
 
-        {/* Play button — vector circle + triangle */}
-        <a
-          href="#play"
-          aria-label="Play"
-          className="absolute left-[44.53%] top-[38.33%] block h-[19.44%] w-[10.94%] cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff]"
-          data-node-id="1:8"
-        >
-          <svg
-            viewBox="0 0 100 100"
-            className="block size-full"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden
-          >
-            <circle
-              cx="50"
-              cy="50"
-              r="50"
-              fill={PLAY_CIRCLE_FILL}
-            />
-            {/* Right-pointing play triangle, centered with slight right nudge */}
-            <path
-              d="M40 26 L40 74 L74 50 Z"
-              fill={PLAY_TRIANGLE_FILL}
-            />
-          </svg>
-        </a>
+        {/* Play button — opens login modal */}
+        <PlayButton />
       </div>
+      <LoginModal
+        open={openLoginModal}
+        onClose={() => setOpenLoginModal(false)}
+      />
     </div>
   );
 }
