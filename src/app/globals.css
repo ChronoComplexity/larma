@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Opening page: full-width responsive canvas, 16:9 to viewport, capped so it doesn’t over-zoom */
+.opening-page__canvas {
+  width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 1920 / 1080;
+}
