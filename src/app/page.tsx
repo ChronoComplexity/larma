@@ -7,18 +7,22 @@ import { PlayButton } from "@/components/PlayButton";
 import { motion } from "motion/react";
 import Link from "next/link";
 import SceneBackground from "@/components/SceneBackground";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const MotionImage = motion(Image);
 
-const IMG_DOGS = "/images/dog_sitting.png";
+const IMG_DOG1 = "/images/Dog 1.png";
+const IMG_DOG2 = "/images/Dog 2.png";
+const IMG_DOG3 = "/images/Dog 3.png";
+const IMG_DOG4 = "/images/Dog 4.png";
+const IMG_DOG5 = "/images/Dog 5.png";
 const IMG_TREE = "/images/tree.png";
 
 const PLAY_CIRCLE_FILL = "var(--light-green)";
 const PLAY_TRIANGLE_FILL = "var(--dark-green)";
 
-const images = [IMG_DOGS, IMG_TREE];
+const images = [IMG_DOG1, IMG_DOG2,IMG_DOG3,IMG_DOG4,IMG_DOG5];
 
 export default function Home() {
   const { openLoginModal, setOpenLoginModal } = useAuth();
@@ -29,6 +33,11 @@ export default function Home() {
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
+
+  useEffect(() => {
+        const timeout = setTimeout(() => nextImage(), 100)
+        return () => clearTimeout(timeout)
+    }, [currentIndex])
 
   return (
     <div
@@ -42,14 +51,13 @@ export default function Home() {
             <div className="pointer-events-none relative size-full flex-shrink-0 overflow-hidden">
 
               <motion.div
-                initial={{ y: 200, x: 0 }}
+                initial={{ y: 300, x: 100 }}
                 animate={{
-                  y: 200,
-                  x: 50,
-                  scale: [1, 1.2, 1],
+                  y: 300,
+                  x: [0,100,0],
                   zIndex: 1,
                 }}
-                transition={{ duration: 10 }}
+                transition={{ duration: 5 }}
                 style={{ width: 100, height: 100 }}
               >
                 <MotionImage
@@ -57,9 +65,9 @@ export default function Home() {
                   alt="Animated scene element"
                   width={500}
                   height={300}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
+                  initial={{ opacity: 1, y: 200 }}
+                  animate={{ opacity: 1, y: 200 }}
+                  transition={{ duration: 0 }}
                 />
 
                 <img
@@ -95,7 +103,7 @@ export default function Home() {
                 <img
                   alt=""
                   className="absolute inset-0 size-[67%] object-contain object-bottom"
-                  src={IMG_DOGS}
+                  src={IMG_DOG2}
                 />
               </div>
 
