@@ -3,35 +3,65 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import SceneBackground from "@/components/SceneBackground";
+import { cursorTo } from "readline";
+import { useState } from "react"
 
 const IMG_DOGS = "/images/dog_sitting.png";
 const IMG_TREE = "/images/tree.png";
 const PLAY_CIRCLE_FILL = "#569629";
 const PLAY_TRIANGLE_FILL = "#2d4f15";
 
+const images = [
+  IMG_DOGS,
+  IMG_TREE
+]
+
+
 export default function OpeningPage() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextImage = () => {
+      var prevIndex = currentIndex;
+     setCurrentIndex((prevIndex + 1) % images.length);
+  };
+
+  const currentImage = images[currentIndex];
+
   return (
     <SceneBackground>
       <div className="pointer-events-none fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-transparent">
       <div className="pointer-events-none relative size-full flex-shrink-0 overflow-hidden">
 
         <div
-          className="pointer-events-none absolute z-1 width-full"
+          className="pointer-events-none absolute left-[20%] top-[52%] h-[20%] w-[60%] md:left-[16.09%] md:top-[29.91%] md:h-[59.44%] md:w-[50.16%]  z-1 width-full"
           aria-hidden
         >
           <motion.div 
-            initial = {{ y: 350, x: 0}}
-            animate = {{ y:[0,350,0], x: 100}}
+            initial = {{ y: "100%", x: 0}}
+            animate = {{ y:"30%", x: 20}}
             transition = {{ duration:1 }}
           >
             <img
               alt=""
-              className="relative inset-0 scale-x-[-1] object-top"
-              src={IMG_DOGS}
+              className="absolute inset-0 scale-x-[-1] object-top"
+              src={currentImage}
             />
           </motion.div>
 
         </div>
+
+        <button type="button" onClick={()=>nextImage}>Next Image</button>
+
+      <div
+        className="pointer-events-none absolute left-[20%] top-[52%] h-[20%] w-[60%] opacity-30 md:left-[16.09%] md:top-[29.91%] md:h-[59.44%] md:w-[50.16%]"
+        aria-hidden
+      >
+        <img
+          alt=""
+          className="size-full max-w-none object-cover object-bottom"
+          src={IMG_MOUNTAIN}
+        />
+      </div>
 
       <p
         className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]"
