@@ -36,20 +36,30 @@ export default function Home() {
         openLoginModal ? "" : "overflow-hidden"
       }`}
     >
-      <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
+      {/* 1. FULL SCREEN CANVAS 
+          Removed fixed aspect ratios. Using w-screen h-screen to fill everything.
+      */}
+      <div className="opening-page__canvas relative h-screen w-screen overflow-hidden">
+        {/* NOTE: Ensure SceneBackground uses "object-cover" internally 
+           to avoid bars on the actual background image. 
+        */}
         <SceneBackground>
-          <div className="pointer-events-none fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-transparent">
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-transparent">
             <div className="pointer-events-none relative size-full flex-shrink-0 overflow-hidden">
+              {/* Floating Animated Element */}
               <motion.div
-                initial={{ y: 200, x: 0 }}
+                initial={{ y: "20vh", x: 0 }}
                 animate={{
-                  y: 200,
-                  x: 50,
-                  scale: [1, 1.2, 1],
-                  zIndex: 1,
+                  y: "20vh",
+                  x: "5vh",
+                  scale: [1, 1.1, 1],
                 }}
-                transition={{ duration: 10 }}
-                style={{ width: 100, height: 100 }}
+                transition={{
+                  duration: 10,
+                  repeat: Infinity,
+                  repeatType: "mirror",
+                }}
+                className="absolute z-10 h-[12vh] w-[12vh]"
               >
                 <MotionImage
                   src={currentImage}
@@ -59,23 +69,18 @@ export default function Home() {
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                />
-
-                <img
-                  alt=""
-                  className="absolute inset-0 scale-x-[-1] object-top"
+                  className="size-full object-contain"
                 />
               </motion.div>
 
               <button
                 type="button"
                 onClick={nextImage}
-                className="pointer-events-auto absolute top-4 left-4 bg-black text-white px-3 py-1 rounded"
+                className="pointer-events-auto absolute top-4 left-4 bg-black text-white px-3 py-1 rounded z-50"
               >
                 Next Image
               </button>
 
-              {/* Play button — opens login modal */}
               <PlayButton />
 
               <LoginModal
@@ -83,36 +88,47 @@ export default function Home() {
                 onClose={() => setOpenLoginModal(false)}
               />
 
-              <p className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]">
-                larma
-              </p>
+              {/* 2. CHARACTER GROUP (Text + Dog)
+                  Using 'vh' ensures they stay together and fit on the screen height-wise.
+              */}
+              <div className="absolute left-[52%] top-[12%] flex flex-col items-center w-[40vh] pointer-events-none">
+                <p className="w-full whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[18vh] leading-none not-italic text-black">
+                  larma
+                </p>
 
-              <div
-                className="pointer-events-none absolute left-[52%] top-[45%] h-[37.5%] w-[21.09%] overflow-hidden md:left-[67.5%]"
-                aria-hidden
-              >
-                <img
-                  alt=""
-                  className="absolute inset-0 size-[67%] object-contain object-bottom"
-                  src={IMG_DOGS}
-                />
+                <div
+                  className="flex h-[32vh] w-full items-end justify-center mt-[-10%]"
+                  aria-hidden
+                >
+                  <img
+                    alt="Dog"
+                    className="h-full w-full object-contain object-bottom"
+                    src={IMG_DOGS}
+                  />
+                </div>
               </div>
 
+              {/* 3. TREE
+                  Anchored to the left-bottom, sized by height.
+              */}
               <div
-                className="pointer-events-none absolute left-[32%] top-[30.5%] h-[37.5%] w-[24%] overflow-visible md:left-[77.5%] md:w-[21.09%]"
+                className="pointer-events-none absolute left-[5%] bottom-[5%] h-[55vh] w-[40vh]"
                 aria-hidden
               >
                 <img
-                  alt=""
-                  className="absolute bottom-0 left-1/2 size-[100%] -translate-x-1/2 object-contain object-bottom md:size-[150%]"
+                  alt="Tree"
+                  className="h-full w-full object-contain object-bottom"
                   src={IMG_TREE}
                 />
               </div>
 
+              {/* 4. CENTER PLAY BUTTON 
+                  Always centered and sized relative to screen height.
+              */}
               <Link
                 href="/home-page"
                 aria-label="Play"
-                className="pointer-events-auto absolute left-1/2 top-[36%] block h-[22%] w-[22%] max-w-[120px] -translate-x-1/2 cursor-pointer border-0 bg-transparent p-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff] md:left-[44.53%] md:top-[38.33%] md:h-[19.44%] md:w-[10.94%] md:max-w-none md:translate-x-0"
+                className="pointer-events-auto absolute left-1/2 top-[42%] block h-[18vh] aspect-square -translate-x-1/2 cursor-pointer border-0 bg-transparent p-0 transition-transform hover:scale-105"
               >
                 <svg
                   viewBox="0 0 100 100"

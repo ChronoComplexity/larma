@@ -29,25 +29,42 @@ body {
 }
 
 .pixel-art {
-  image-rendering: pixelated; /* Chrome, Edge, Firefox */
-  image-rendering: crisp-edges; /* Safari */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
-/* Opening page: full-width responsive canvas, 16:9 to viewport, capped so it doesn't over-zoom */
+/* 1. Localized Horizon Background 
+  Applied to the outermost container in Home.tsx
+*/
+.scene-horizon {
+  background: linear-gradient(
+    to bottom,
+    #91b7c6 0%,
+    #91b7c6 50%,
+    #663931 50%,
+    #663931 100%
+  );
+  background-attachment: fixed;
+}
+
+/* 2. Fluid Canvas
+  Removed the aspect-ratio constraints. Now it fills the viewport 
+  exactly, allowing the background to zoom/fill naturally.
+*/
 .opening-page__canvas {
   width: 100vw;
-  height: min(56.25vw, 100vh);
-  max-height: 100vh;
-  aspect-ratio: 1920 / 1080;
+  height: 100vh;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Portrait: full height, fills screen vertically (sides cropped) */
+/* 3. Removed the Portrait Math 
+  No more width: 177.78vh; we want it to stay at 100vw to avoid horizontal overflow.
+*/
 @media (orientation: portrait) {
   .opening-page__canvas {
-    width: 177.78vh;
+    width: 100vw;
     height: 100vh;
-    max-height: none;
-    aspect-ratio: 1920 / 1080;
   }
 }
