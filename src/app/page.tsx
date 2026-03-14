@@ -5,8 +5,9 @@ const IMG_BG = "/images/sky_bright.png";
 const IMG_MOUNTAIN =
   "https://www.figma.com/api/mcp/asset/667c79f3-bad8-4f0e-acc7-70106e7b6239";
 const IMG_DOGS =
-  "https://www.figma.com/api/mcp/asset/78192275-a9df-4389-83bd-8287ff7ff289";
+  "/images/dog_sitting.png";
 const IMG_GROUND = "/images/ground.png";
+const IMG_TREE = "/images/tree.png";
 
 /* Play button colors (vector style, matches pixel-art green) */
 const PLAY_CIRCLE_FILL = "#569629";
@@ -16,9 +17,9 @@ export default function Home() {
   return (
     <div className="opening-page fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-white">
       <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
-        {/* Sky — full width, top ~67% of canvas */}
+        {/* Sky — more height on mobile so ground feels less dominant */}
         <div
-          className="pointer-events-none absolute left-0 top-0 h-[66.76%] w-full overflow-hidden opacity-90 shadow-[0px_4px_200px_0px_rgba(0,0,0,0.15)]"
+          className="pointer-events-none absolute left-0 top-0 h-[72%] w-full overflow-hidden opacity-90 shadow-[0px_4px_200px_0px_rgba(0,0,0,0.15)] md:h-[66.76%]"
           aria-hidden
         >
           <img
@@ -28,43 +29,79 @@ export default function Home() {
           />
         </div>
 
-        {/* Overlay */}
+        {/* Mountain — on mobile: anchored at horizon (bottom at ground line), not floating */}
         <div
-          className="pointer-events-none absolute left-[16.09%] top-[29.91%] h-[59.44%] w-[50.16%] opacity-30"
+          className="pointer-events-none absolute left-[20%] top-[52%] h-[20%] w-[60%] opacity-30 md:left-[16.09%] md:top-[29.91%] md:h-[59.44%] md:w-[50.16%]"
           aria-hidden
         >
           <img
             alt=""
-            className="absolute inset-0 size-full max-w-none object-cover"
+            className="absolute inset-0 size-full max-w-none object-cover object-bottom"
             src={IMG_MOUNTAIN}
           />
         </div>
 
-        {/* Ground — full width, bottom ~33% */}
+        {/* Ground — thinner on mobile (28%), less zoomed feel */}
         <div
-          className="pointer-events-none absolute left-0 top-[66.76%] h-[33.24%] w-full overflow-hidden"
+          className="pointer-events-none absolute left-0 top-[72%] h-[28%] w-full overflow-hidden md:top-[80%] md:h-[20%]"
           aria-hidden
         >
           <img
             alt=""
-            className="absolute inset-0 size-full object-cover [object-position:50%_22%]"
+            className="absolute inset-0 size-full object-cover object-top [object-position:50%_15%] md:[object-position:50%_15%] md:h-[2%]"
             src={IMG_GROUND}
           />
         </div>
 
-        {/* Title — bigger on mobile, scales on larger screens */}
+        {/* Title — centered horizontally on all screens */}
         <p
-          className="absolute left-1/2 top-[10.74%] w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]"
+          className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]"
           data-node-id="1:7"
         >
           larma
         </p>
 
-        {/* Play button — vector circle + triangle */}
+        {/* Left dog — nudge right on mobile so not cut off by portrait crop */}
+        <div
+          className="pointer-events-none absolute left-[4%] top-[33.43%] h-[37.5%] w-[21.09%] overflow-hidden md:left-0"
+          aria-hidden
+        >
+          <img
+            alt=""
+            className="absolute inset-0 size-full scale-x-[-1] object-contain object-bottom"
+            src={IMG_DOGS}
+          />
+        </div>
+
+        {/* Right dog — pull left on mobile so visible in portrait */}
+        <div
+          className="pointer-events-none absolute left-[56%] top-[45%] h-[37.5%] w-[21.09%] overflow-hidden md:left-[67.5%]"
+          aria-hidden
+        >
+          <img
+            alt=""
+            className="absolute inset-0 size-[67%] object-contain object-bottom"
+            src={IMG_DOGS}
+          />
+        </div>
+
+        {/* Tree — well left on mobile so full tree visible, no cutoff */}
+        <div
+          className="pointer-events-none absolute left-[42%] top-[30.5%] h-[37.5%] w-[24%] overflow-visible md:left-[77.5%] md:w-[21.09%]"
+          aria-hidden
+        >
+          <img
+            alt=""
+            className="absolute bottom-0 left-1/2 size-[130%] -translate-x-1/2 object-contain object-bottom md:size-[150%]"
+            src={IMG_TREE}
+          />
+        </div>
+
+        {/* Play button — truly centered on mobile (left-1/2 -translate-x-1/2), larger for touch */}
         <a
           href="#play"
           aria-label="Play"
-          className="absolute left-[44.53%] top-[38.33%] block h-[19.44%] w-[10.94%] cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff]"
+          className="absolute left-1/2 top-[36%] block h-[22%] w-[22%] max-w-[120px] -translate-x-1/2 cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff] md:left-[44.53%] md:top-[38.33%] md:h-[19.44%] md:w-[10.94%] md:max-w-none md:translate-x-0"
           data-node-id="1:8"
         >
           <svg
