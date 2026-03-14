@@ -1,57 +1,45 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "edge";
-
-const PATHWAY_ID = "f02dfb48-3222-478f-8fce-7d5ece71a9cf";
+type BlandResponse = {
+  status: "success" | "error";
+  call_id: string;
+};
 
 export async function POST(request: Request) {
   try {
-    const { phoneNumber, startTime } = await request.json();
+    // 1. Grab secret from root .env.local (Local) or Vercel (Prod)
+    const BLAND_AI_KEY = process.env.BLAND_API_KEY;
 
-    if (!phoneNumber) {
+    if (!BLAND_AI_KEY) {
       return NextResponse.json(
-        { error: "Phone number is required" },
-        { status: 400 },
+        { error: "API Key not configured" },
+        { status: 500 },
       );
     }
 
-    // 1. Initialise the request body with only required fields
-    const requestBody: any = {
-      phone_number: phoneNumber,
-      pathway_id: PATHWAY_ID,
-    };
+    // 2. Parse the body from your frontend fetch()
+    const { phoneNumber, pathwayId } = await request.json() as { phoneNumber: string, pathwayId: string };
 
-    // 2. Only add start_time if it exists.
-    // If this key is missing, Bland AI defaults to an instant call.
-    if (startTime) {
-      requestBody.start_time = startTime;
-    }
-
-    // 3. Trigger the Bland AI call
+    // 3. The actual API call to Bland
     const response = await fetch("https://api.bland.ai/v1/calls", {
       method: "POST",
       headers: {
-        Authorization: process.env.BLAND_API_KEY!,
+        Authorization: BLAND_AI_KEY,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        phone_number: phoneNumber,
+        pathway_id: pathwayId,
+      }),
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as BlandResponse;
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: data.message || "Bland AI Error" },
-        { status: response.status },
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      callId: data.call_id,
-      mode: startTime ? "Scheduled" : "Instant",
-    });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
