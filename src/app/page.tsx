@@ -13,17 +13,52 @@ const PLAY_TRIANGLE_FILL = "#2d4f15";
 
 export default function OpeningPage() {
   return (
-    <SceneBackground>
-      <div
-        className="pointer-events-none absolute left-[20%] top-[52%] h-[20%] w-[60%] opacity-30 md:left-[16.09%] md:top-[29.91%] md:h-[59.44%] md:w-[50.16%]"
-        aria-hidden
-      >
-        <img
-          alt=""
-          className="size-full max-w-none object-cover object-bottom"
-          src={IMG_MOUNTAIN}
-        />
-      </div>
+    <div className="opening-page fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-white">
+      <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
+        {/* Sky — more height on mobile so ground feels less dominant */}
+        <div
+          className="pointer-events-none absolute left-0 top-0 h-[72%] w-full overflow-hidden opacity-90 shadow-[0px_4px_200px_0px_rgba(0,0,0,0.15)] md:h-[66.76%] z-0"
+          aria-hidden
+        >
+          
+            <img
+              alt=""
+              className="absolute inset-0 size-full object-cover object-top"
+              src={IMG_BG}
+            />
+        </div>
+
+         {/* Left dog — nudge right on mobile so not cut off by portrait crop */}
+        <div
+          className="pointer-events-none absolute z-1"
+          aria-hidden
+        >
+          <motion.div 
+            initial = {{ y: 350, x: 0}}
+            animate = {{ y:350, x: 100}}
+            transition = {{ duration:1 }}
+          >
+            <img
+              alt=""
+              className="inset-0 scale-x-[-1] object-top"
+              src={IMG_DOGS}
+            />
+          </motion.div>
+
+        </div>
+
+
+        {/* Mountain — on mobile: anchored at horizon (bottom at ground line), not floating */}
+        <div
+          className="pointer-events-none absolute left-[20%] top-[52%] h-[20%] w-[60%] opacity-30 md:left-[16.09%] md:top-[29.91%] md:h-[59.44%] md:w-[50.16%]"
+          aria-hidden
+        >
+          <img
+            alt=""
+            className="size-full max-w-none object-bottom z-0"
+            src={IMG_MOUNTAIN}
+          />
+        </div>
 
       <div
         className="pointer-events-none absolute left-[4%] top-[33.43%] h-[37.5%] w-[21.09%] md:left-0"
@@ -36,8 +71,8 @@ export default function OpeningPage() {
         >
           <img
             alt=""
-            className="scale-x-[-1] object-contain object-bottom size-full"
-            src={IMG_DOGS}
+            className="inset-0 size-full object-cover object-top [object-position:50%_22%]"
+            src={IMG_GROUND}
           />
         </motion.div>
       </div>
