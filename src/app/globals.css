@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 :root {
   --background: #ffffff;
@@ -23,4 +24,25 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.pixel-art {
+  image-rendering: pixelated; /* Chrome, Edge, Firefox */
+  image-rendering: crisp-edges; /* Safari */
+}
+
+/* Opening page: full-width responsive canvas, 16:9 to viewport, capped so it doesn't over-zoom */
+.opening-page__canvas {
+  width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 1920 / 1080;
+}
+
+/* Portrait: full height so it works vertically on mobile */
+@media (orientation: portrait) {
+  .opening-page__canvas {
+    width: 177.78vh;
+    height: 100vh;
+    max-height: none;
+  }
 }
