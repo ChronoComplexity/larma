@@ -8,6 +8,7 @@ import Link from "next/link";
 import SceneBackground from "@/components/SceneBackground";
 import { useState } from "react";
 import Image from "next/image";
+import { PlayButton } from "@/components/PlayButton";
 
 const MotionImage = motion(Image);
 
@@ -62,7 +63,6 @@ export default function Home() {
                   className="size-full object-contain"
                 />
               </motion.div>
-
               <button
                 type="button"
                 onClick={nextImage}
@@ -70,12 +70,10 @@ export default function Home() {
               >
                 Next Image
               </button>
-
               <LoginModal
                 open={openLoginModal}
                 onClose={() => setOpenLoginModal(false)}
               />
-
               {/* CHARACTER GROUP (Text + Dog) */}
               <div className="absolute left-[52%] top-[10%] flex flex-col items-center w-[40vh] pointer-events-none">
                 <p className="w-full whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[18vh] leading-none text-black">
@@ -90,7 +88,6 @@ export default function Home() {
                   />
                 </div>
               </div>
-
               {/* TREE */}
               <div className="pointer-events-none absolute left-[5%] bottom-[5%] h-[55vh] w-[40vh]">
                 <img
@@ -99,15 +96,15 @@ export default function Home() {
                   src={IMG_TREE}
                 />
               </div>
-
-              {/* SCALABLE PLAY BUTTON 
-                  - Increased to 28vh for a "large" feel.
-                  - Uses -translate-y-1/2 to keep it perfectly centered on its anchor point.
-              */}
+              {/** Replace with PLAY BUTTON LATER */}
               <Link
                 href="/home-page"
                 aria-label="Play"
-                className="pointer-events-auto absolute left-1/2 top-[45%] block h-[28vh] aspect-square -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                className="pointer-events-auto absolute left-1/2 top-[45%] block -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                style={{
+                  height: "clamp(4rem, 15vh, 8rem)",
+                  width: "clamp(4rem, 15vh, 8rem)",
+                }}
               >
                 <svg
                   viewBox="0 0 100 100"
