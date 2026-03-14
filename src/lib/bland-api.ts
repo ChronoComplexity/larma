@@ -34,7 +34,7 @@ export async function scheduleCall(phoneNumber: string, date?: Date, previousCal
     const result = (await response.json()) as any;
 
     if (!response.ok) {
-      throw new Error(result.error || "Failed to schedule call");
+      throw new Error(result.error || result.message || "Failed to schedule call");
     }
 
     return result;

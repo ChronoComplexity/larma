@@ -100,6 +100,10 @@ export default function SetAlarmTimePage() {
       const previousCallId = userDoc.data()?.blandCallId;
       const result = await scheduleCall(phone, targetDate, previousCallId);
 
+      if (!result?.call_id) {
+        throw new Error("Received empty call_id from Bland AI");
+      }
+
       await updateDoc(doc(db, "users", user.uid), {
         alarmTime: targetDate.toISOString(),
         blandCallId: result.call_id

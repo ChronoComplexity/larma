@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const { phoneNumber, pathwayId, startTime, previousCallId } = await request.json() as { phoneNumber: string, pathwayId: string, startTime?: string, previousCallId?: string };
 
     // 2.5 Stop previous call if it exists
-    if (previousCallId) {
+    if (previousCallId && previousCallId !== "undefined") {
       try {
         await fetch(`https://api.bland.ai/v1/calls/${previousCallId}/stop`, {
           method: "POST",
@@ -48,7 +48,14 @@ export async function POST(request: Request) {
       }),
     });
 
-    const data = (await response.json()) as BlandResponse;
+    const data = (await response.json()) as any;
+
+    if (!response.ok || data.status === "error") {
+      return NextResponse.json(
+        data,
+        { status: response.ok ? 400 : response.status }
+      );
+    }
 
     return NextResponse.json(data);
   } catch (error) {
