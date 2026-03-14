@@ -2,6 +2,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": "./custom-worker.ts",
 	"name": "larma",
+	// Env vars: local = .dev.vars (gitignored); production = Cloudflare dashboard Variables or `wrangler secret put`
 	"compatibility_date": "2026-03-13",
 	"compatibility_flags": [
 		"nodejs_compat",
@@ -55,5 +56,7 @@
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
-	}
+	},
+	// Keep Firebase env vars in the dashboard
+	"keep_vars": true
 }

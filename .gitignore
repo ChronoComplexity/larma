@@ -45,5 +45,8 @@ next-env.d.ts
 .open-next
 .wrangler
 
+# Wrangler env (values only; copy from .env.local)
+.dev.vars
+
 # Bun
 package-lock.json
