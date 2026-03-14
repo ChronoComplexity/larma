@@ -35,17 +35,17 @@ export default function OpeningPage() {
 
          {/* Left dog — nudge right on mobile so not cut off by portrait crop */}
         <div
-          className="pointer-events-none absolute left-[4%] top-[33.43%] h-[37.5%] w-[21.09%] md:left-0"
+          className="pointer-events-none absolute z-1"
           aria-hidden
         >
           <motion.div 
-            initial = {{ y: 100, x: 0}}
-            animate = {{ y:100, x: 100}}
+            initial = {{ y: 350, x: 0}}
+            animate = {{ y:350, x: 100}}
             transition = {{ duration:1 }}
           >
             <img
               alt=""
-              className="scale-x-[-1] z-1"
+              className="inset-0 scale-x-[-1] object-top"
               src={IMG_DOGS}
             />
           </motion.div>
@@ -72,7 +72,7 @@ export default function OpeningPage() {
         >
           <img
             alt=""
-            className="absolute inset-0 size-full object-cover object-top [object-position:50%_22%]"
+            className="inset-0 size-full object-cover object-top [object-position:50%_22%]"
             src={IMG_GROUND}
           />
         </div>
