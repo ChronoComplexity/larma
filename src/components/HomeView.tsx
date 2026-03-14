@@ -25,7 +25,7 @@ function formatAlarmTime(isoString: string | null): string {
 }
 
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  const { alarmSet, alarmTime, phone, loading } = useAlarmStatus();
+  const { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
   const showSquareContent = !loading && !alarmSet;
   const leftPanelImage = loading || !alarmSet ? IMG_SQUARE : IMG_RECTANGLE;
 
@@ -99,7 +99,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               />
               <div className="absolute inset-0 flex items-center justify-center pb-[18%] pr-[5%]">
                 <p className="text-center text-[clamp(0.7rem,2.2vh,1.1rem)] font-bold text-gray-800">
-                  Health: 50%
+                  Health: {health != null ? `${health}%` : "—"}
                 </p>
               </div>
             </div>

@@ -5,11 +5,12 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 
-export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null; phone: string | null; loading: boolean } {
+export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null; phone: string | null; health: number | null; loading: boolean } {
   const { user } = useAuth();
   const [alarmSet, setAlarmSet] = useState(false);
   const [alarmTime, setAlarmTime] = useState<string | null>(null);
   const [phone, setPhone] = useState<string | null>(null);
+  const [health, setHealth] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
       setAlarmSet(false);
       setAlarmTime(null);
       setPhone(null);
+      setHealth(null);
       setLoading(false);
       return;
     }
@@ -34,6 +36,14 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
         setAlarmSet(Boolean(time));
         setAlarmTime(typeof time === "string" ? time : null);
         setPhone(typeof data?.phone === "string" ? data.phone : null);
+        const healthVal = data?.health;
+        if (typeof healthVal === "number" && healthVal >= 0 && healthVal <= 100) {
+          setHealth(healthVal);
+        } else if (typeof healthVal === "number") {
+          setHealth(Math.min(100, Math.max(0, healthVal)));
+        } else {
+          setHealth(null);
+        }
       } catch {
         if (!cancelled) {
           setAlarmSet(false);
@@ -51,5 +61,5 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
     };
   }, [user?.uid]);
 
-  return { alarmSet, alarmTime, phone, loading };
+  return { alarmSet, alarmTime, phone, health, loading };
 }
