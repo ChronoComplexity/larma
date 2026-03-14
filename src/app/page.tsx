@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "motion/react"
+
 /* Figma: UniHack2 Opening Page - Real (node-id=1-3). Responsive: %-based layout, full width. */
 const IMG_BG = "/images/sky_bright.png";
 const IMG_MOUNTAIN =
