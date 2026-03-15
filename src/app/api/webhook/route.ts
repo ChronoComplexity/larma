@@ -4,13 +4,15 @@ import {
   findUserByPhone,
   getUserDailyLog,
   updateUserDailyLog,
-  updateUserFields,
 } from "@/lib/firestore-rest";
 
-function clampHealth(value: number): number {
-  if (value < 0) return 0;
-  if (value > 100) return 100;
-  return value;
+function parseIsSnooze(value: unknown): boolean | null {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    if (value.toLowerCase() === "true") return true;
+    if (value.toLowerCase() === "false") return false;
+  }
+  return null;
 }
 
 export async function POST(request: Request) {
@@ -29,15 +31,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = (await request.json()) as { phone_number?: unknown };
+    const body = (await request.json()) as {
+      phone_number?: unknown;
+      is_snooze?: unknown;
+    };
     const phoneNumber =
       typeof body.phone_number === "string" ? body.phone_number.trim() : "";
+    const isSnooze = parseIsSnooze(body.is_snooze);
 
     if (!phoneNumber) {
-      return NextResponse.json(
-        { error: "phone_number is required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "phone_number is required." }, { status: 400 });
+    }
+
+    if (isSnooze == null) {
+      return NextResponse.json({ error: "is_snooze is required." }, { status: 400 });
     }
 
     const user = await findUserByPhone(phoneNumber);
@@ -53,36 +60,31 @@ export async function POST(request: Request) {
       "UTC";
     const dateKey = getLocalDateKey(now, timezone);
     const currentLog = await getUserDailyLog(user.id, dateKey);
-    const snoozeTimes = [...(currentLog?.snoozeTimes || []), nowIso];
-    const snoozeCount = snoozeTimes.length;
-    const nextHealth =
-      snoozeCount > 1
-        ? clampHealth((user.health ?? 100) - 10)
-        : clampHealth(user.health ?? 100);
 
     await updateUserDailyLog(user.id, dateKey, {
       date: dateKey,
       timezone,
       triggeredCallTimes: currentLog?.triggeredCallTimes || [],
-      snoozeTimes,
-      snoozeCount,
+      responseTimes: [...(currentLog?.responseTimes || []), nowIso],
+      snoozeResponseTimes: isSnooze
+        ? [...(currentLog?.snoozeResponseTimes || []), nowIso]
+        : currentLog?.snoozeResponseTimes || [],
+      wakeUpResponseTimes: isSnooze
+        ? currentLog?.wakeUpResponseTimes || []
+        : [...(currentLog?.wakeUpResponseTimes || []), nowIso],
+      snoozeCount: currentLog?.snoozeCount || 0,
       checkedInAt: currentLog?.checkedInAt,
-    });
-
-    await updateUserFields(user.id, {
-      health: nextHealth,
-      pendingSnooze: true,
-      pendingSnoozeRequestedAt: nowIso,
+      lastResponseAt: nowIso,
+      lastResponseIsSnooze: isSnooze,
     });
 
     return NextResponse.json({
       success: true,
       userId: user.id,
-      snoozeCount,
-      health: nextHealth,
+      isSnooze,
     });
   } catch (error: unknown) {
-    console.error("Snooze webhook error:", error);
+    console.error("Webhook error:", error);
     const message =
       error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json({ error: message }, { status: 500 });

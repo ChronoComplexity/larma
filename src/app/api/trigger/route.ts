@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  DEFAULT_SNOOZE_MINUTES,
   getLocalDateKey,
   getNextAlarmISO,
   isCurrentAlarmMinute,
@@ -12,6 +13,12 @@ import {
   updateUserDailyLog,
   updateUserFields,
 } from "@/lib/firestore-rest";
+
+function clampHealth(value: number): number {
+  if (value < 0) return 0;
+  if (value > 100) return 100;
+  return value;
+}
 
 export async function POST(request: Request) {
   try {
@@ -30,46 +37,11 @@ export async function POST(request: Request) {
     let dueByFallbackCount = 0;
 
     for (const user of fallbackCandidates) {
+      if (usersById.has(user.id)) continue;
+
       const tz = typeof user.timezone === "string" ? user.timezone : "UTC";
       const pref = normalizeTime(user.time, tz);
       if (!pref) continue;
-
-      if (user.pendingSnooze && user.pendingSnoozeRequestedAt) {
-        const requestedAt = new Date(user.pendingSnoozeRequestedAt);
-
-        if (Number.isNaN(requestedAt.getTime())) {
-          await updateUserFields(user.id, {
-            pendingSnooze: false,
-            pendingSnoozeRequestedAt: null,
-          });
-          usersById.delete(user.id);
-          continue;
-        }
-
-        const snoozeUntil = new Date(
-          requestedAt.getTime() + (user.snoozeMinutes || 5) * 60 * 1000
-        ).toISOString();
-
-        await updateUserFields(user.id, {
-          nextAlarmTime: snoozeUntil,
-          pendingSnooze: false,
-          pendingSnoozeRequestedAt: null,
-        });
-
-        if (snoozeUntil <= nowIso) {
-          usersById.set(user.id, {
-            ...user,
-            nextAlarmTime: snoozeUntil,
-            pendingSnooze: false,
-            pendingSnoozeRequestedAt: undefined,
-          });
-        } else {
-          usersById.delete(user.id);
-        }
-        continue;
-      }
-
-      if (usersById.has(user.id)) continue;
 
       if (!isCurrentAlarmMinute(pref.hours, pref.minutes, pref.timezone, now)) continue;
 
@@ -88,27 +60,27 @@ export async function POST(request: Request) {
       process.env.BLAND_PATHWAY_ID || process.env.NEXT_PUBLIC_BLAND_PATHWAY_ID;
 
     for (const user of users) {
+      const tz = typeof user.timezone === "string" ? user.timezone : "UTC";
+      const pref = normalizeTime(user.time, tz);
+      let shouldRepeatUntilCheckIn = false;
+
       if (!user.phone) {
         skipped.push({ id: user.id, reason: "missing_phone" });
       } else if (!pathwayId) {
         skipped.push({ id: user.id, reason: "missing_pathway_id" });
       } else {
+        const timezone = pref?.timezone || tz;
+        const dateKey = getLocalDateKey(now, timezone);
+        const dailyLog = await getUserDailyLog(user.id, dateKey);
+        const isFollowUpCall =
+          Boolean(dailyLog && !dailyLog.checkedInAt && dailyLog.triggeredCallTimes.length > 0);
+        const penalty = isFollowUpCall
+          ? dailyLog?.lastResponseIsSnooze === false
+            ? 15
+            : 10
+          : 0;
+
         try {
-          const tz = typeof user.timezone === "string" ? user.timezone : "UTC";
-          const pref = normalizeTime(user.time, tz);
-          const timezone = pref?.timezone || tz;
-          const dateKey = getLocalDateKey(now, timezone);
-          const dailyLog = await getUserDailyLog(user.id, dateKey);
-
-          await updateUserDailyLog(user.id, dateKey, {
-            date: dateKey,
-            timezone,
-            triggeredCallTimes: [...(dailyLog?.triggeredCallTimes || []), nowIso],
-            snoozeTimes: dailyLog?.snoozeTimes || [],
-            snoozeCount: dailyLog?.snoozeCount || 0,
-            checkedInAt: dailyLog?.checkedInAt,
-          });
-
           const res = await fetch("https://api.bland.ai/v1/calls", {
             method: "POST",
             headers: {
@@ -125,6 +97,26 @@ export async function POST(request: Request) {
             skipped.push({ id: user.id, reason: "bland_call_failed" });
             console.error("Failed to trigger bland call for user", user.id, blandRes);
           } else {
+            await updateUserDailyLog(user.id, dateKey, {
+              date: dateKey,
+              timezone,
+              triggeredCallTimes: [...(dailyLog?.triggeredCallTimes || []), nowIso],
+              responseTimes: dailyLog?.responseTimes || [],
+              snoozeResponseTimes: dailyLog?.snoozeResponseTimes || [],
+              wakeUpResponseTimes: dailyLog?.wakeUpResponseTimes || [],
+              snoozeCount: (dailyLog?.snoozeCount || 0) + (isFollowUpCall ? 1 : 0),
+              checkedInAt: dailyLog?.checkedInAt,
+              lastResponseAt: dailyLog?.lastResponseAt,
+              lastResponseIsSnooze: dailyLog?.lastResponseIsSnooze,
+            });
+
+            if (penalty > 0) {
+              await updateUserFields(user.id, {
+                health: clampHealth((user.health ?? 100) - penalty),
+              });
+            }
+
+            shouldRepeatUntilCheckIn = true;
             triggered.push(user.id);
           }
         } catch (err) {
@@ -133,18 +125,17 @@ export async function POST(request: Request) {
         }
       }
 
-      // Reschedule from user's preferred time + timezone so we stay consistent with DB.
-      const tz = typeof user.timezone === "string" ? user.timezone : "UTC";
-      const pref = normalizeTime(user.time, tz);
-      const nextAlarmTime = pref
-        ? getNextAlarmISO(pref.hours, pref.minutes, pref.timezone, new Date())
-        : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      const nextAlarmTime =
+        shouldRepeatUntilCheckIn
+          ? new Date(
+              now.getTime() +
+                (user.snoozeMinutes || DEFAULT_SNOOZE_MINUTES) * 60 * 1000
+            ).toISOString()
+          : pref
+            ? getNextAlarmISO(pref.hours, pref.minutes, pref.timezone, new Date())
+            : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-      await updateUserFields(user.id, {
-        nextAlarmTime,
-        pendingSnooze: false,
-        pendingSnoozeRequestedAt: null,
-      });
+      await updateUserFields(user.id, { nextAlarmTime });
     }
 
     return NextResponse.json({

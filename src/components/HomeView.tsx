@@ -104,8 +104,14 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           triggeredCallTimes: Array.isArray(dailyLog?.triggeredCallTimes)
             ? dailyLog.triggeredCallTimes
             : [],
-          snoozeTimes: Array.isArray(dailyLog?.snoozeTimes)
-            ? dailyLog.snoozeTimes
+          responseTimes: Array.isArray(dailyLog?.responseTimes)
+            ? dailyLog.responseTimes
+            : [],
+          snoozeResponseTimes: Array.isArray(dailyLog?.snoozeResponseTimes)
+            ? dailyLog.snoozeResponseTimes
+            : [],
+          wakeUpResponseTimes: Array.isArray(dailyLog?.wakeUpResponseTimes)
+            ? dailyLog.wakeUpResponseTimes
             : [],
           snoozeCount,
           checkedInAt: nowIso,
@@ -121,8 +127,6 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           pref.timezone,
           now,
         ),
-        pendingSnooze: false,
-        pendingSnoozeRequestedAt: null,
       });
 
       setCheckInMessage("Checked in.");

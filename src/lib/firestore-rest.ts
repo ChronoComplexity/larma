@@ -30,17 +30,19 @@ export type TriggerableUser = {
   nextAlarmTime?: string;
   health?: number;
   snoozeMinutes?: number;
-  pendingSnooze?: boolean;
-  pendingSnoozeRequestedAt?: string;
 };
 
 export type UserDailyLog = {
   date: string;
   timezone: string;
   triggeredCallTimes: string[];
-  snoozeTimes: string[];
+  responseTimes: string[];
+  snoozeResponseTimes: string[];
+  wakeUpResponseTimes: string[];
   snoozeCount: number;
   checkedInAt?: string;
+  lastResponseAt?: string;
+  lastResponseIsSnooze?: boolean;
 };
 
 const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
@@ -270,11 +272,6 @@ function mapTriggerableUser(doc: {
     nextAlarmTime: typeof fields.nextAlarmTime === "string" ? fields.nextAlarmTime : undefined,
     health: typeof fields.health === "number" ? fields.health : undefined,
     snoozeMinutes: normalizeSnoozeMinutes(fields.snoozeMinutes),
-    pendingSnooze: fields.pendingSnooze === true,
-    pendingSnoozeRequestedAt:
-      typeof fields.pendingSnoozeRequestedAt === "string"
-        ? fields.pendingSnoozeRequestedAt
-        : undefined,
   } satisfies TriggerableUser;
 }
 
@@ -290,11 +287,23 @@ function mapUserDailyLog(doc: {
     triggeredCallTimes: Array.isArray(fields.triggeredCallTimes)
       ? fields.triggeredCallTimes.filter((value): value is string => typeof value === "string")
       : [],
-    snoozeTimes: Array.isArray(fields.snoozeTimes)
-      ? fields.snoozeTimes.filter((value): value is string => typeof value === "string")
+    responseTimes: Array.isArray(fields.responseTimes)
+      ? fields.responseTimes.filter((value): value is string => typeof value === "string")
+      : [],
+    snoozeResponseTimes: Array.isArray(fields.snoozeResponseTimes)
+      ? fields.snoozeResponseTimes.filter((value): value is string => typeof value === "string")
+      : [],
+    wakeUpResponseTimes: Array.isArray(fields.wakeUpResponseTimes)
+      ? fields.wakeUpResponseTimes.filter((value): value is string => typeof value === "string")
       : [],
     snoozeCount: typeof fields.snoozeCount === "number" ? fields.snoozeCount : 0,
     checkedInAt: typeof fields.checkedInAt === "string" ? fields.checkedInAt : undefined,
+    lastResponseAt:
+      typeof fields.lastResponseAt === "string" ? fields.lastResponseAt : undefined,
+    lastResponseIsSnooze:
+      typeof fields.lastResponseIsSnooze === "boolean"
+        ? fields.lastResponseIsSnooze
+        : undefined,
   } satisfies UserDailyLog;
 }
 
