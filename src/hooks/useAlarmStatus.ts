@@ -42,7 +42,7 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
         } else if (typeof healthVal === "number") {
           setHealth(Math.min(100, Math.max(0, healthVal)));
         } else {
-          setHealth(null);
+          setHealth(100);
         }
       } catch {
         if (!cancelled) {
