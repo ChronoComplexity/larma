@@ -9,7 +9,11 @@ import Dog from "@/components/Dog";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { getLocalDateKey, getNextDayAlarmISO, normalizeTime } from "@/lib/alarm-time";
+import {
+  getLocalDateKey,
+  getNextDayAlarmISO,
+  normalizeTime,
+} from "@/lib/alarm-time";
 // import "../app/global.css";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
@@ -48,7 +52,8 @@ function clampHealth(value: number): number {
 }
 
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  const { alarmSet, alarmTime, phone, loading, health, snoozeMinutes } = useAlarmStatus();
+  const { alarmSet, alarmTime, phone, loading, health, snoozeMinutes } =
+    useAlarmStatus();
   const { user } = useAuth();
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
@@ -105,7 +110,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           snoozeCount,
           checkedInAt: nowIso,
         },
-        { merge: true }
+        { merge: true },
       );
 
       await updateDoc(userRef, {
@@ -114,7 +119,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           pref.hours,
           pref.minutes,
           pref.timezone,
-          now
+          now,
         ),
         pendingSnooze: false,
         pendingSnoozeRequestedAt: null,
@@ -137,7 +142,6 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           className="absolute left-[2%] top-[1%] h-[30vh] w-[38vw] sm:left-[3%] sm:top-[9%] sm:h-[35vh] sm:min-h-[180px] sm:w-[36vw] sm:max-w-[240px] md:left-[4%] md:top-[10%] md:h-[40vh] md:min-h-[200px] md:w-[25vw] md:max-w-[260px] lg:max-w-[280px]"
           aria-hidden
         >
-
           {showSquareContent && (
             <div className="absolute inset-0 size-full object-contain bg-light-green">
               {/* Top white section */}
@@ -276,6 +280,9 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
       <Dog x={300} y={460} begin={800} width={200} height={200} />
       <Dog x={500} y={460} begin={500} width={200} height={100} />
       <Dog x={500} y={555} begin={200} width={80} height={100} />
+      <Dog x={800} y={500} begin={1300} width={150} height={100} />
+      <Dog x={400} y={550} begin={900} width={100} height={100} />
+      <Dog x={900} y={430} begin={1200} width={300} height={100} />
     </SceneBackground>
   );
 }
