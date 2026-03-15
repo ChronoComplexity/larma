@@ -34,8 +34,7 @@ function getSkyVariant(health: number | null): SkyVariant {
 }
 
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  let { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
-  health =20;
+  const { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
   const showSquareContent = !loading && !alarmSet;
   const leftPanelImage = loading || !alarmSet ? IMG_SQUARE : IMG_RECTANGLE;
   const showHearts = health != null && health >= 50;
