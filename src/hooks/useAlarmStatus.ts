@@ -38,10 +38,10 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
         const pref = normalizeTime(data?.time, tz);
         const hasAlarm = Boolean(next ?? pref);
         setAlarmSet(hasAlarm);
-        if (typeof next === "string") {
-          setAlarmTime(next);
-        } else if (pref) {
+        if (pref) {
           setAlarmTime(`${pref.hours.toString().padStart(2, "0")}:${pref.minutes.toString().padStart(2, "0")}`);
+        } else if (typeof next === "string") {
+          setAlarmTime(next);
         } else {
           setAlarmTime(null);
         }
