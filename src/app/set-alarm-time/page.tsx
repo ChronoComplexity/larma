@@ -147,7 +147,7 @@ export default function SetAlarmTimePage() {
               className="pointer-events-none absolute inset-0 size-full object-contain object-center"
               src={SPEECH_BUBBLE}
             />
-            <div className="absolute left-[18%] right-[18%] top-[15%] bottom-[28%] flex items-center justify-center gap-2 sm:gap-3">
+            <div className="absolute left-[18%] right-[18%] top-[22%] flex items-center justify-center gap-2 sm:gap-3">
               <input
                 type="text"
                 inputMode="numeric"
