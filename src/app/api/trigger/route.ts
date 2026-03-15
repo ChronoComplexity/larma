@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
 import { getNextAlarmISO, normalizeTime } from "@/lib/alarm-time";
+import {
+    listUsersReadyForAlarm,
+    updateUserNextAlarmTime,
+} from "@/lib/firestore-rest";
 
 export async function POST(request: Request) {
     try {
@@ -11,23 +14,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (!adminDb) {
-            return NextResponse.json({ error: "Admin DB not initialized" }, { status: 500 });
-        }
-
         const nowIso = new Date().toISOString();
-
-        const usersRef = adminDb.collection("users");
-        const qs = await usersRef.where("nextAlarmTime", "<=", nowIso).get();
+        const users = await listUsersReadyForAlarm(nowIso);
 
         const triggered = [];
 
-        for (const userDoc of qs.docs) {
-            const data = userDoc.data();
-            triggered.push(userDoc.id);
+        for (const user of users) {
+            triggered.push(user.id);
 
             // Trigger the call via Bland
-            if (data.phone) {
+            if (user.phone) {
                 try {
                     const res = await fetch("https://api.bland.ai/v1/calls", {
                         method: "POST",
@@ -36,13 +32,13 @@ export async function POST(request: Request) {
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            phone_number: data.phone,
+                            phone_number: user.phone,
                             pathway_id: process.env.NEXT_PUBLIC_BLAND_PATHWAY_ID,
                         }),
                     });
-                    const blandRes = (await res.json()) as any;
+                    const blandRes: unknown = await res.json();
                     if (!res.ok) {
-                        console.error("Failed to trigger bland call for user", userDoc.id, blandRes);
+                        console.error("Failed to trigger bland call for user", user.id, blandRes);
                     }
                 } catch (err) {
                     console.error("Error triggering bland call:", err);
@@ -50,20 +46,20 @@ export async function POST(request: Request) {
             }
 
             // Reschedule from user's preferred time + timezone so we stay consistent with DB.
-            const tz = typeof data.timezone === "string" ? data.timezone : "UTC";
-            const pref = normalizeTime(data.time, tz);
+            const tz = typeof user.timezone === "string" ? user.timezone : "UTC";
+            const pref = normalizeTime(user.time, tz);
             const nextAlarmTime = pref
                 ? getNextAlarmISO(pref.hours, pref.minutes, pref.timezone, new Date())
                 : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-            await adminDb.collection("users").doc(userDoc.id).update({
-                nextAlarmTime,
-            });
+            await updateUserNextAlarmTime(user.id, nextAlarmTime);
         }
 
         return NextResponse.json({ success: true, count: triggered.length, triggered });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Trigger error:", error);
-        return NextResponse.json({ error: error.message || "Internal Error" }, { status: 500 });
+        const message =
+            error instanceof Error ? error.message : "Internal Error";
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
