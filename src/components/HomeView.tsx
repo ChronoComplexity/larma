@@ -35,6 +35,7 @@ function getSkyVariant(health: number | null): SkyVariant {
 
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
   let { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
+  health =20;
   const showSquareContent = !loading && !alarmSet;
   const leftPanelImage = loading || !alarmSet ? IMG_SQUARE : IMG_RECTANGLE;
   const showHearts = health != null && health >= 50;
@@ -127,26 +128,36 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center" aria-hidden>
                 <img
                   alt=""
-                  className="absolute top-[20%] left-1/2 h-[10%] min-h-[28px] w-auto -translate-x-1/2 object-contain md:top-[22%] md:h-[12%]"
+                  className="absolute top-[6%] left-[18%] h-[10%] min-h-[50px] w-auto -translate-x-1/2 object-contain md:top-[8%] md:h-[12%]"
                   src={IMG_HEART}
                 />
                 <img
                   alt=""
-                  className="absolute top-[24%] left-[22%] h-[9%] min-h-[24px] w-auto object-contain md:top-[26%] md:left-[28%] md:h-[11%]"
+                  className="absolute top-[6%] left-[38%] h-[10%] min-h-[58px] w-auto -translate-x-1/2 object-contain md:top-[8%] md:h-[12%]"
                   src={IMG_HEART}
                 />
                 <img
                   alt=""
-                  className="absolute top-[24%] right-[22%] h-[9%] min-h-[24px] w-auto object-contain md:top-[26%] md:right-[28%] md:h-[11%]"
+                  className="absolute top-[6%] left-[58%] h-[10%] min-h-[50px] w-auto -translate-x-1/2 object-contain md:top-[8%] md:h-[12%]"
                   src={IMG_HEART}
                 />
               </div>
             )}
             {showSleep && (
-              <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center" aria-hidden>
+              <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center" aria-hidden>
                 <img
                   alt=""
-                  className="absolute top-[18%] left-1/2 h-[14%] min-h-[50px] w-auto -translate-x-1/2 object-contain md:top-[20%] md:h-[16%]"
+                  className="absolute top-[5%] left-1/2 h-[10%] min-h-[58px] w-auto -translate-x-1/2 object-contain md:top-[6%] md:h-[12%]"
+                  src={IMG_SLEEP}
+                />
+                <img
+                  alt=""
+                  className="absolute top-[8%] left-[32%] h-[9%] min-h-[50px] w-auto object-contain md:top-[10%] md:left-[35%] md:h-[11%]"
+                  src={IMG_SLEEP}
+                />
+                <img
+                  alt=""
+                  className="absolute top-[8%] right-[32%] h-[9%] min-h-[50px] w-auto object-contain md:top-[10%] md:right-[35%] md:h-[11%]"
                   src={IMG_SLEEP}
                 />
               </div>
