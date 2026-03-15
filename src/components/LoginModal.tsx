@@ -41,6 +41,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
           await setDoc(doc(db, "users", credential.user.uid), {
             phone: phone,
             email: email,
+            health: 100,
           });
         }
       } else {
