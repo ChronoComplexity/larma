@@ -25,6 +25,7 @@ export type TriggerableUser = {
   phone?: string;
   timezone?: string;
   time?: unknown;
+  nextAlarmTime?: string;
 };
 
 const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
@@ -232,6 +233,23 @@ function getDocumentId(name: string): string {
   return parts[parts.length - 1] || name;
 }
 
+function mapTriggerableUser(doc: {
+  name: string;
+  fields?: Record<string, Record<string, unknown>>;
+}): TriggerableUser {
+  const fields = Object.fromEntries(
+    Object.entries(doc.fields || {}).map(([key, value]) => [key, decodeFirestoreValue(value)])
+  );
+
+  return {
+    id: getDocumentId(doc.name),
+    phone: typeof fields.phone === "string" ? fields.phone : undefined,
+    timezone: typeof fields.timezone === "string" ? fields.timezone : undefined,
+    time: fields.time,
+    nextAlarmTime: typeof fields.nextAlarmTime === "string" ? fields.nextAlarmTime : undefined,
+  } satisfies TriggerableUser;
+}
+
 async function firestoreRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const accessToken = await getAccessToken();
   const response = await fetch(`${FIRESTORE_BASE}${path}`, {
@@ -287,19 +305,31 @@ export async function listUsersReadyForAlarm(nowIso: string): Promise<Triggerabl
 
   return results
     .filter((row) => row.document?.name)
-    .map((row) => {
-      const doc = row.document!;
-      const fields = Object.fromEntries(
-        Object.entries(doc.fields || {}).map(([key, value]) => [key, decodeFirestoreValue(value)])
-      );
+    .map((row) => mapTriggerableUser(row.document!));
+}
 
-      return {
-        id: getDocumentId(doc.name),
-        phone: typeof fields.phone === "string" ? fields.phone : undefined,
-        timezone: typeof fields.timezone === "string" ? fields.timezone : undefined,
-        time: fields.time,
-      } satisfies TriggerableUser;
-    });
+export async function listUsersWithAlarmPreferences(): Promise<TriggerableUser[]> {
+  const { project_id } = getServiceAccount();
+  const results = await firestoreRequest<
+    Array<{
+      document?: {
+        name: string;
+        fields?: Record<string, Record<string, unknown>>;
+      };
+    }>
+  >(`/projects/${project_id}/databases/(default)/documents:runQuery`, {
+    method: "POST",
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "users" }],
+      },
+    }),
+  });
+
+  return results
+    .filter((row) => row.document?.name)
+    .map((row) => mapTriggerableUser(row.document!))
+    .filter((user) => user.time != null);
 }
 
 export async function updateUserNextAlarmTime(userId: string, nextAlarmTime: string): Promise<void> {

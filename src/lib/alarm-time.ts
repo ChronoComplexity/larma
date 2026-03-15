@@ -10,9 +10,30 @@ export interface AlarmTimePreference {
   timezone: string;
 }
 
+type ZonedTimeParts = {
+  hour: number;
+  minute: number;
+};
+
+function getZonedTimeParts(date: Date, timezone: string): ZonedTimeParts {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const part = (k: string) => parts.find((p) => p.type === k)?.value ?? "0";
+
+  return {
+    hour: parseInt(part("hour"), 10),
+    minute: parseInt(part("minute"), 10),
+  };
+}
+
 /**
  * Returns the next UTC moment when the clock in the given timezone shows
- * (hours, minutes). Uses Intl only; steps through 15-min intervals for 2 days.
+ * (hours, minutes). Uses Intl only; scans minute-by-minute for up to 2 days.
  */
 export function getNextAlarmISO(
   hours: number,
@@ -20,32 +41,29 @@ export function getNextAlarmISO(
   timezone: string,
   after: Date = new Date()
 ): string {
-  const stepMs = 15 * 60 * 1000;
-  const maxSteps = (2 * 24 * 60) / 15; // 2 days in 15-min steps
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  let t = after.getTime();
+  const stepMs = 60 * 1000;
+  const maxSteps = 2 * 24 * 60;
+  let t = Math.floor(after.getTime() / stepMs) * stepMs + stepMs;
   for (let i = 0; i < maxSteps; i++) {
     const date = new Date(t);
-    const parts = formatter.formatToParts(date);
-    const part = (k: string) => parts.find((p) => p.type === k)?.value ?? "0";
-    const h = parseInt(part("hour"), 10);
-    const m = parseInt(part("minute"), 10);
-    if (h === hours && m === minutes) {
+    const zoned = getZonedTimeParts(date, timezone);
+    if (zoned.hour === hours && zoned.minute === minutes) {
       return date.toISOString();
     }
     t += stepMs;
   }
   // fallback: 24h from after
   return new Date(after.getTime() + 24 * 60 * 60 * 1000).toISOString();
+}
+
+export function isCurrentAlarmMinute(
+  hours: number,
+  minutes: number,
+  timezone: string,
+  now: Date = new Date()
+): boolean {
+  const zoned = getZonedTimeParts(now, timezone);
+  return zoned.hour === hours && zoned.minute === minutes;
 }
 
 /**
